@@ -41,7 +41,7 @@ Task Description : Evaluate the model with different benchmarks(ST-VQA, OCR-VQA,
 ## Visual Chat Application
 
 
-Task Description : Create a visual Chat with PDF. Instead of just relying on the text in the PDF building a Chat with PDf which taks both text and visual input will be more usefull Use CLIP for image encoding and use one of the model from [Massive Text Embedding Benchmark (MTEB)](https://huggingface.co/spaces/mteb/leaderboard) for the textual embedding use a vector database to store both Image and text embedding. Later whil Chating Perform a simple RAG(Retrival augmented Generation) pipelien to retrive relavent text and images from the database and perform in-context learning
+Task Description: Create a visual chat interface integrated with PDFs. Instead of solely relying on text within the PDF, building a chat system that considers both textual and visual inputs would be more useful. Utilize CLIP for image encoding and select a model from the Massive Text Embedding Benchmark (MTEB) leaderboard (accessible at [https://huggingface.co/spaces/mteb/leaderboard](https://huggingface.co/spaces/mteb/leaderboard)) for textual embedding. Employ a vector database to store both image and text embeddings. During the chat, implement a simple RAG (Retrieval Augmented Generation) pipeline to retrieve relevant text and images from the database. Additionally, incorporate in-context learning for an enhanced user experience.
 
 - [] Create the base application using Gradio
 - [] Choose and Set up a vector database
