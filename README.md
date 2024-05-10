@@ -1,10 +1,38 @@
-**Project README: Vision-Augmented Retrieval and Generation (VARAG)**
+## Vision-Augmented Retrieval and Generation (VARAG)
 
 **Introduction:**
 
 Vision-Augmented Retrieval and Generation (VARAG) is an innovative approach that enhances conventional Retrieval-Augmented Generation (RAG) systems by incorporating both textual and visual information. Traditional RAG systems primarily rely on textual data, potentially missing out on valuable information present in diagrams, flowcharts, and images. VARAG combines RAG with Vision-Language models to understand and process both text and images effectively.
 
+
+```mermaid
+graph TD;
+    A[Upload Document] --> B{Document Format};
+    B --> |PDF| C[Convert PDF to Text and Images];
+    B --> |Other| D[Extract Text];
+    C --> E[Perform OCR with SURYA OCR];
+    D --> E;
+    E --> F{Text and Image Processing};
+    F --> |Text| G[Text Processing];
+    F --> |Images| H[Image Processing];
+    G --> I[Tokenization, Cleaning, and Preprocessing];
+    H --> J[Feature Extraction];
+    I --> K[Store Processed Text in Vector Database];
+    J --> L[Store Image Features in Vector Database];
+    K --> M{Query Generation};
+    L --> M;
+    M --> N{Similarity Search};
+    N --> O[Retrieve Relevant Text and Images];
+    O --> P[Perform RAG];
+    P --> Q[Generate Responses];
+    Q --> R[Display Responses];
+    R --> S{Use Vision-Language Model};
+    S --> T[Generate Responses using VizGPT];
+    T --> R;
+```
+
 This project aims to develop a comprehensive pipeline that enables VARAG to handle text-heavy documents such as PDFs, textbooks, and research papers. By leveraging Vision-Language models, the system can extract, understand, and interact with textual and visual content seamlessly, facilitating tasks like question answering, summarization, and visual chat interfaces.
+
 
 **Features:**
 
