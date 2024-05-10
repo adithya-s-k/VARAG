@@ -97,6 +97,3 @@ VARAG is licensed under the [MIT License](https://opensource.org/licenses/MIT), 
 
 We extend our sincere appreciation to the developers of Surya, Marker, GPT-4 Vision, and various other tools and libraries that have played pivotal roles in the success of this project. Additionally, we are grateful for the support of the open-source community and the invaluable feedback from users during the development journey.
 
-**Acknowledgments:**
-
-We would like to express our gratitude to the developers of Surya, Marker, GPT-4 Vision, and various other tools and libraries that have contributed to the success of this project. Additionally, we appreciate the support of the open-source community and the valuable feedback from users during the development process.
