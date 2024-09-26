@@ -8,7 +8,12 @@ readme = "README.md"
 packages = [{include = "varag"}]  # Add this line
 
 [tool.poetry.dependencies]
-python = >=3.10,<3.13"
+python = ">=3.10,<3.13"
+lancedb = "^0.13.0"
+fastapi = "^0.115.0"
+gradio = "^4.44.0"
+openai = "^1.48.0"
+transformers = "^4.45.0"
 
 [build-system]
 requires = ["poetry-core"]
