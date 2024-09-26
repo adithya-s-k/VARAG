@@ -2,7 +2,7 @@ Here's a modified README based on the additional information you provided:
 
 # 👁️👁️ VARAG (Vision Augmented Retrieval and Generation)
 
-| ![VARAG](https://github.com/adithya-s-k/VARAG/assets/27956426/08947c34-1f7b-481b-ab12-1efd2e5ab92f)| VARAG (Vision-Augmented Retrieval and Generation) is an innovative Vision `RAG engine` designed to set up Vision-Driven RAG-based Systems. It enhances conventional Retrieval-Augmented Generation (RAG) systems by incorporating both textual and visual information, effectively combining RAG with Vision-Language models to understand and process both text and images. |
+| ![VARAG](./docs/assets/llama.png)| VARAG (Vision-Augmented Retrieval and Generation) is a vision-first RAG engine that emphasizes vision-based retrieval techniques. It enhances traditional Retrieval-Augmented Generation (RAG) systems by integrating both visual and textual data through Vision-Language models. |
 |:--:|:--|
 
 ## Supported Retrieval Techniques
