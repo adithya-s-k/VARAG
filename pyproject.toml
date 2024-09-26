@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "varag"
+version = "0.1.0"
+description = "Create Vision Driven RAG Systems at Scale"
+authors = ["Adithya S K <adithyaskolavi@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+packages = [{include = "varag"}]  # Add this line
+
+[tool.poetry.dependencies]
+python = >=3.10,<3.13"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
