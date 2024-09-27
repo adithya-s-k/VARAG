@@ -1,5 +1,6 @@
 import gradio as gr
 import os
+import lancedb
 from varag.rag import VisionRAG
 from sentence_transformers import SentenceTransformer
 from varag.vlms import OpenAI
@@ -7,21 +8,21 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# Initialize shared database
+shared_db = lancedb.connect("~/shared_rag_db")
+
 # Initialize VisionRAG and VLM
 embedding_model = SentenceTransformer("jinaai/jina-clip-v1", trust_remote_code=True)
 vision_rag = VisionRAG(
     image_embedding_model=embedding_model,
-    db_path="~/visionrag_db",
+    db=shared_db,
     table_name="default_table",
 )
 vlm = OpenAI()
 
 
-def ingest_pdf(pdf_files, db_path, table_name, recursive, verbose):
+def ingest_pdf(pdf_files, table_name, recursive, verbose):
     try:
-        # Update the database path and table name if provided
-        if db_path:
-            vision_rag.db_path = os.path.expanduser(db_path)
         if table_name:
             vision_rag.change_table(table_name)
 
@@ -29,16 +30,13 @@ def ingest_pdf(pdf_files, db_path, table_name, recursive, verbose):
         vision_rag.index(
             file_paths, overwrite=False, recursive=recursive, verbose=verbose
         )
-        return f"PDFs ingested successfully into table '{vision_rag.table_name}' in database '{vision_rag.db_path}'."
+        return f"PDFs ingested successfully into table '{vision_rag.table_name}'."
     except Exception as e:
         return f"Error ingesting PDFs: {str(e)}"
 
 
-def search_and_generate_response(query, db_path, table_name):
+def search_and_generate_response(query, table_name):
     try:
-        # Update the database path and table name if provided
-        if db_path:
-            vision_rag.db_path = os.path.expanduser(db_path)
         if table_name:
             vision_rag.change_table(table_name)
 
@@ -69,9 +67,6 @@ def gradio_interface():
 
         with gr.Tab("Ingest PDFs"):
             pdf_input = gr.File(label="Upload PDF(s)", file_count="multiple")
-            db_path_input = gr.Textbox(
-                label="Database Path (optional)", placeholder="~/visionrag_db"
-            )
             table_name_input = gr.Textbox(
                 label="Table Name (optional)", placeholder="default_table"
             )
@@ -82,9 +77,6 @@ def gradio_interface():
 
         with gr.Tab("Search and Analyze"):
             query_input = gr.Textbox(label="Enter your query")
-            search_db_path_input = gr.Textbox(
-                label="Database Path (optional)", placeholder="~/visionrag_db"
-            )
             search_table_name_input = gr.Textbox(
                 label="Table Name (optional)", placeholder="default_table"
             )
@@ -96,7 +88,6 @@ def gradio_interface():
             ingest_pdf,
             inputs=[
                 pdf_input,
-                db_path_input,
                 table_name_input,
                 recursive_checkbox,
                 verbose_checkbox,
@@ -105,7 +96,7 @@ def gradio_interface():
         )
         search_button.click(
             search_and_generate_response,
-            inputs=[query_input, search_db_path_input, search_table_name_input],
+            inputs=[query_input, search_table_name_input],
             outputs=[response_output, image_output],
         )
 

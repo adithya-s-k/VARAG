@@ -1,17 +1,23 @@
 import gradio as gr
 from sentence_transformers import SentenceTransformer
 from openai import OpenAI
-from varag.rag import TextRAG
+from varag.rag import SimpleRAG
 from varag.chunking import FixedTokenChunker
+import lancedb
+from dotenv import load_dotenv
 
+load_dotenv()
 
 # Initialize embedding model
 embedding_model = SentenceTransformer("all-MiniLM-L6-v2", trust_remote_code=True)
 
-# Initialize TextRAG
-text_rag = TextRAG(
+# Initialize shared database
+shared_db = lancedb.connect("~/shared_rag_db")
+
+# Initialize TextRAG with shared database
+text_rag = SimpleRAG(
     text_embedding_model=embedding_model,
-    db_path="~/visionrag_db",
+    db=shared_db,
     table_name="default_table",
 )
 
@@ -39,7 +45,7 @@ def query_and_answer(query, num_results):
 
     # Generate response using OpenAI
     context = "\n".join([r["text"] for r in search_results])
-    response = llm.query.completions.create(
+    response = llm.chat.completions.create(
         model="gpt-4",
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
