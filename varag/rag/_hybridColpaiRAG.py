@@ -1,0 +1,2 @@
+class HybridColpaliRAG:
+    pass
