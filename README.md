@@ -52,30 +52,6 @@ To run the demo:
 python demo.py
 ```
 
-### Server
-
-To start the VARAG server:
-
-```bash
-python server.py
-```
-
-## API Endpoints
-
-VARAG provides the following API endpoints:
-
-- Configure
-- Ingest
-- Search
-- Query
-
-## Docker
-
-Docker support is available for VARAG. (You may want to add specific instructions for using Docker here.)
-
-## Explaining Vision Diagrams
-
-VARAG has the capability to explain vision diagrams. (You might want to elaborate on this feature and how it works.)
 
 ## 🛠️ Contributing
 
