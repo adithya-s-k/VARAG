@@ -281,7 +281,9 @@ def gradio_interface():
                 50, 5000, value=200, step=10, label="Chunk Size (for SimpleRAG)"
             )
             ingest_button = gr.Button("Ingest PDFs")
-            ingest_output = gr.Markdown(label="Ingestion Status", lines=10)
+            ingest_output = gr.Markdown(
+                label="Ingestion Status :",
+            )
             progress_table = gr.DataFrame(
                 label="Ingestion Progress", headers=["Technique", "Time Taken (s)"]
             )
