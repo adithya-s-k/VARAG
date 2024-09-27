@@ -1,6 +1,6 @@
 import gradio as gr
 from sentence_transformers import SentenceTransformer
-from openai import OpenAI
+from varag.llms import OpenAI
 from varag.rag import SimpleRAG
 from varag.chunking import FixedTokenChunker
 import lancedb
@@ -9,7 +9,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Initialize embedding model
-embedding_model = SentenceTransformer("all-MiniLM-L6-v2", trust_remote_code=True)
+# embedding_model = SentenceTransformer("all-MiniLM-L6-v2", trust_remote_code=True)
+embedding_model = SentenceTransformer("BAAI/bge-base-en", trust_remote_code=True)
+# embedding_model = SentenceTransformer("BAAI/bge-large-en-v1.5", trust_remote_code=True)
+# embedding_model = SentenceTransformer("BAAI/bge-small-en-v1.5", trust_remote_code=True)
 
 # Initialize shared database
 shared_db = lancedb.connect("~/shared_rag_db")
@@ -45,21 +48,21 @@ def query_and_answer(query, num_results):
 
     # Generate response using OpenAI
     context = "\n".join([r["text"] for r in search_results])
-    response = llm.chat.completions.create(
-        model="gpt-4",
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": f"Context: {context}\n\nQuestion: {query}"},
-        ],
+    response = llm.query(
+        context=context,
+        system_prompt="Given the below information answer the questions",
+        query=query,
     )
 
     # Format the results
     formatted_results = "\n\n".join(
-        [f"Chunk {i+1}:\n{r['text']}" for i, r in enumerate(search_results)]
+        [
+            f"{'==='*50}\n\n\nChunk {i+1}:\n{r['text']}{r['chunk_index']}{r['document_name']}\n\n\n{'==='*50}"
+            for i, r in enumerate(search_results)
+        ]
     )
-    answer = response.choices[0].message.content
 
-    return formatted_results, answer
+    return formatted_results, response
 
 
 # Define the Gradio interface
@@ -68,7 +71,7 @@ with gr.Blocks() as demo:
 
     with gr.Tab("Ingest Documents"):
         file_input = gr.File(file_count="multiple", label="Upload PDF Documents")
-        chunk_size = gr.Slider(50, 500, value=200, step=10, label="Chunk Size")
+        chunk_size = gr.Slider(50, 5000, value=200, step=10, label="Chunk Size")
         use_ocr = gr.Checkbox(label="Use OCR")
         ingest_button = gr.Button("Ingest Documents")
         ingest_output = gr.Textbox(label="Ingestion Result")
