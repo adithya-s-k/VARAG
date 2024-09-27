@@ -19,6 +19,7 @@ from torch.utils.data import Dataset
 from sentence_transformers import SentenceTransformer
 from colpali_engine.models import ColPali
 from colpali_engine.models.paligemma.colpali.processing_colpali import ColPaliProcessor
+from varag.utils import get_model_colpali
 
 T = TypeVar("T")
 
@@ -34,22 +35,13 @@ class ListDataset(Dataset[T]):
         return self.elements[idx]
 
 
-def get_model_colpali(model_name):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = ColPali.from_pretrained(
-        model_name,
-        torch_dtype=torch.bfloat16,
-        device_map=device,
-    ).eval()
-    processor = cast(ColPaliProcessor, ColPaliProcessor.from_pretrained(model_name))
-    return model, processor
-
-
 class HybridColpaliRAG:
     def __init__(
         self,
         image_embedding_model: SentenceTransformer,
-        colpali_model: str = "vidore/colpali-v1.2",
+        colpali_model: Optional[ColPali] = None,
+        colpali_processor: Optional[ColPaliProcessor] = None,
+        model_name: str = "vidore/colpali-v1.2",
         db: Union[lancedb.connect, None] = None,
         db_path: str = "~/lancedb",
         table_name: str = "hybrid_colpali_rag_table",
@@ -57,7 +49,12 @@ class HybridColpaliRAG:
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         print(f"Using device: {self.device}")
         self.image_embedding_model = image_embedding_model.to(self.device)
-        self.colpali_model, self.colpali_processor = get_model_colpali(colpali_model)
+
+        if colpali_model is None or colpali_processor is None:
+            self.colpali_model, self.colpali_processor = get_model_colpali(model_name)
+        else:
+            self.colpali_model = colpali_model
+            self.colpali_processor = colpali_processor
 
         if db is None:
             self.db_path = os.path.expanduser(db_path)

@@ -11,6 +11,9 @@ import io
 # Import the HybridColpaliRAG class and OpenAI VLM
 from varag.rag import HybridColpaliRAG
 from varag.vlms import OpenAI
+from varag.utils import get_model_colpali
+
+model, processor = get_model_colpali("vidore/colpali-v1.2")
 
 load_dotenv()
 
@@ -21,6 +24,8 @@ shared_db = lancedb.connect("~/shared_rag_db")
 embedding_model = SentenceTransformer("jinaai/jina-clip-v1", trust_remote_code=True)
 
 hybrid_rag = HybridColpaliRAG(
+    colpali_model=model,
+    colpali_processor=processor,
     image_embedding_model=embedding_model,
     db=shared_db,
     table_name="hybridColpaliDemo",

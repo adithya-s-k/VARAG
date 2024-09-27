@@ -10,11 +10,14 @@ import io
 # Import the colpali class and OpenAI VLM
 from varag.rag import ColpaliRAG
 from varag.vlms import OpenAI
+from varag.utils import get_model_colpali
 
 load_dotenv()
 
 # Initialize shared database
 shared_db = lancedb.connect("~/shared_rag_db")
+model, processor = get_model_colpali("vidore/colpali-v1.2")
+
 
 colpali_rag = ColpaliRAG(
     db=shared_db,

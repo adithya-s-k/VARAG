@@ -18,6 +18,7 @@ from torch.utils.data import Dataset
 from sentence_transformers import SentenceTransformer
 from colpali_engine.models import ColPali
 from colpali_engine.models.paligemma.colpali.processing_colpali import ColPaliProcessor
+from varag.utils import get_model_colpali
 
 T = TypeVar("T")
 
@@ -33,28 +34,63 @@ class ListDataset(Dataset[T]):
         return self.elements[idx]
 
 
-def get_model_colpali(model_name):
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = ColPali.from_pretrained(
-        model_name,
-        torch_dtype=torch.bfloat16,
-        device_map=device,
-    ).eval()
-    processor = cast(ColPaliProcessor, ColPaliProcessor.from_pretrained(model_name))
-    return model, processor
+# class ColpaliRAG:
+#     def __init__(
+#         self,
+#         colpali_model: str = "vidore/colpali-v1.2",
+#         db: Union[lancedb.connect, None] = None,
+#         db_path: str = "~/lancedb",
+#         table_name: str = "colpali_rag_table",
+#     ):
+#         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+#         print(f"Using device: {self.device}")
+#         self.colpali_model, self.colpali_processor = get_model_colpali(colpali_model)
+
+#         if db is None:
+#             self.db_path = os.path.expanduser(db_path)
+#             self.db = lancedb.connect(self.db_path)
+#         else:
+#             self.db = db
+
+#         self.table_name = table_name
+
+#         self.schema = pa.schema(
+#             [
+#                 pa.field("document_name", pa.string()),
+#                 pa.field("page_number", pa.int32()),
+#                 pa.field("image", pa.string()),
+#                 pa.field("page_text", pa.string()),
+#                 pa.field("metadata", pa.string()),
+#                 pa.field("page_embedding_shape", pa.list_(pa.int64())),
+#                 pa.field(
+#                     "page_embedding_flatten",
+#                     pa.list_(pa.float32()),
+#                 ),
+#             ]
+#         )
+#         self.table = self.db.create_table(
+#             self.table_name, schema=self.schema, exist_ok=True
+#         )
 
 
 class ColpaliRAG:
     def __init__(
         self,
-        colpali_model: str = "vidore/colpali-v1.2",
+        colpali_model: Optional[ColPali] = None,
+        colpali_processor: Optional[ColPaliProcessor] = None,
+        model_name: str = "vidore/colpali-v1.2",
         db: Union[lancedb.connect, None] = None,
         db_path: str = "~/lancedb",
         table_name: str = "colpali_rag_table",
     ):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         print(f"Using device: {self.device}")
-        self.colpali_model, self.colpali_processor = get_model_colpali(colpali_model)
+
+        if colpali_model is None or colpali_processor is None:
+            self.colpali_model, self.colpali_processor = get_model_colpali(model_name)
+        else:
+            self.colpali_model = colpali_model
+            self.colpali_processor = colpali_processor
 
         if db is None:
             self.db_path = os.path.expanduser(db_path)
@@ -341,7 +377,7 @@ class ColpaliRAG:
                 page = r[idx]
                 pil_image = self.base64_to_pil(page["image"])
                 result = {
-                    "name": page["document_name"],
+                    "document_name": page["document_name"],
                     "page_number": page["page_number"],
                     "image": pil_image,
                 }
