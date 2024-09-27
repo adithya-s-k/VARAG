@@ -77,6 +77,10 @@ class SimpleRAG:
             self.table = self.db.create_table(
                 self.table_name, schema=self.schema, mode="overwrite"
             )
+        else:
+            self.table = self.db.create_table(
+                self.table_name, schema=self.schema, exist_ok=True
+            )
 
         if isinstance(path, str):
             paths = [path]
@@ -258,7 +262,7 @@ class SimpleRAG:
     def change_table(self, new_table_name: str):
         self.table_name = new_table_name
         self.table = self.db.create_table(
-            self.table_name, schema=self.schema, mode="overwrite"
+            self.table_name, schema=self.schema, exist_ok=True
         )
         print(f"Switched to new table: {self.table_name}")
 
