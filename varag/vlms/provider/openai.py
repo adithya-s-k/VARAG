@@ -82,7 +82,7 @@ class OpenAIVLM(BaseVLM):
         if max_tokens is not None:
             completion_params["max_tokens"] = max_tokens
 
-        response = self.client.query.completions.create(**completion_params)
+        response = self.client.chat.completions.create(**completion_params)
         return response.choices[0].message.content
 
     def __call__(self, image: Union[str, Image.Image], query: str) -> str:
