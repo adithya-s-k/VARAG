@@ -41,7 +41,7 @@ schema = pa.schema(
 )
 
 # Create or open the unified table
-table = db.create_table("unified_documents", schema=schema, mode="overwrite")
+table = db.create_table("unified_documents", schema=schema, exist_ok=True)
 
 
 def pdf_to_images(pdf_path: str) -> List[Image.Image]:
