@@ -109,7 +109,13 @@ def embed_text(text: str):
 def search_images(query: str):
     query_embedding = embed_text(query)
 
-    results = table.search(query_embedding.tolist()).limit(3).to_list()
+    results = (
+        table.search(
+            query_embedding.tolist(), query_type="vector", vector_column_name="vector"
+        )
+        .limit(3)
+        .to_list()
+    )
 
     images = [Image.open(io.BytesIO(result["image"])) for result in results]
     return images
