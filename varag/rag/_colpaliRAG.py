@@ -82,6 +82,7 @@ class ColpaliRAG:
         db: Union[lancedb.connect, None] = None,
         db_path: str = "~/lancedb",
         table_name: str = "colpali_rag_table",
+        overwrite: bool = False,
     ):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         print(f"Using device: {self.device}")
@@ -114,9 +115,14 @@ class ColpaliRAG:
                 ),
             ]
         )
-        self.table = self.db.create_table(
-            self.table_name, schema=self.schema, exist_ok=True
-        )
+        if overwrite:
+            self.table = self.db.create_table(
+                self.table_name, schema=self.schema, mode="overwrite"
+            )
+        else:
+            self.table = self.db.create_table(
+                self.table_name, schema=self.schema, exist_ok=True
+            )
 
     def change_table(self, new_table_name: str):
         self.table_name = new_table_name

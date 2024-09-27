@@ -45,6 +45,7 @@ class HybridColpaliRAG:
         db: Union[lancedb.connect, None] = None,
         db_path: str = "~/lancedb",
         table_name: str = "hybrid_colpali_rag_table",
+        overwrite: bool = False,
     ):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         print(f"Using device: {self.device}")
@@ -79,9 +80,14 @@ class HybridColpaliRAG:
                 ),
             ]
         )
-        self.table = self.db.create_table(
-            self.table_name, schema=self.schema, exist_ok=True
-        )
+        if overwrite:
+            self.table = self.db.create_table(
+                self.table_name, schema=self.schema, mode="overwrite"
+            )
+        else:
+            self.table = self.db.create_table(
+                self.table_name, schema=self.schema, exist_ok=True
+            )
 
     def embed_images(self, images: List[Image.Image], verbose: bool = False):
         if verbose:
@@ -365,7 +371,7 @@ class HybridColpaliRAG:
                 page = r[idx]
                 pil_image = self.base64_to_pil(page["image"])
                 result = {
-                    "name": page["document_name"],
+                    "document_name": page["document_name"],
                     "page_number": page["page_number"],
                     "image": pil_image,
                 }

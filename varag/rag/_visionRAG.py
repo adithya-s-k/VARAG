@@ -22,6 +22,7 @@ class VisionRAG:
         db: Union[lancedb.connect, None] = None,
         db_path: str = "~/lancedb",
         table_name: str = "vision_rag_table",
+        overwrite: bool = False,
     ):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.image_embedding_model = image_embedding_model.to(self.device)
@@ -46,9 +47,14 @@ class VisionRAG:
                 pa.field("metadata", pa.string()),
             ]
         )
-        self.table = self.db.create_table(
-            self.table_name, schema=self.schema, exist_ok=True
-        )
+        if overwrite:
+            self.table = self.db.create_table(
+                self.table_name, schema=self.schema, mode="overwrite"
+            )
+        else:
+            self.table = self.db.create_table(
+                self.table_name, schema=self.schema, exist_ok=True
+            )
 
     def change_table(self, new_table_name: str):
         self.table_name = new_table_name
