@@ -19,8 +19,6 @@ from typing import List, TypeVar
 
 from colpali_engine.models import ColPali
 from colpali_engine.models.paligemma.colpali.processing_colpali import ColPaliProcessor
-from colpali_engine.utils.processing_utils import BaseVisualRetrieverProcessor
-from colpali_engine.utils.torch_utils import ListDataset, get_torch_device
 
 from tqdm import tqdm
 from pdf2image import convert_from_path
