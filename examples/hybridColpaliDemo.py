@@ -15,7 +15,7 @@ from varag.vlms import OpenAI
 load_dotenv()
 
 # Initialize shared database
-shared_db = lancedb.connect("~/hybridRAG")
+shared_db = lancedb.connect("~/shared_rag_db")
 
 # Initialize HybridColpaliRAG
 embedding_model = SentenceTransformer("jinaai/jina-clip-v1", trust_remote_code=True)
@@ -23,7 +23,7 @@ embedding_model = SentenceTransformer("jinaai/jina-clip-v1", trust_remote_code=T
 hybrid_rag = HybridColpaliRAG(
     image_embedding_model=embedding_model,
     db=shared_db,
-    table_name="HybridTable",
+    table_name="hybridColpaliDemo",
 )
 
 # Initialize VLM

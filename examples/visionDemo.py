@@ -14,10 +14,11 @@ shared_db = lancedb.connect("~/shared_rag_db")
 # Initialize VisionRAG and VLM
 embedding_model = SentenceTransformer("jinaai/jina-clip-v1", trust_remote_code=True)
 # embedding_model = SentenceTransformer("clip-ViT-B-32", trust_remote_code=True)
+
 vision_rag = VisionRAG(
     image_embedding_model=embedding_model,
     db=shared_db,
-    table_name="default_table",
+    table_name="visionDemo",
 )
 vlm = OpenAI()
 

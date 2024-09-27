@@ -1,28 +1,24 @@
 import gradio as gr
 import os
 import lancedb
-from sentence_transformers import SentenceTransformer
 from dotenv import load_dotenv
 from typing import List
 from PIL import Image
 import base64
 import io
 
-# Import the HybridColpaliRAG class and OpenAI VLM
+# Import the colpali class and OpenAI VLM
 from varag.rag import ColpaliRAG
 from varag.vlms import OpenAI
 
 load_dotenv()
 
 # Initialize shared database
-shared_db = lancedb.connect("~/hybridRAG")
-
-# Initialize HybridColpaliRAG
-embedding_model = SentenceTransformer("jinaai/jina-clip-v1", trust_remote_code=True)
+shared_db = lancedb.connect("~/shared_rag_db")
 
 colpali_rag = ColpaliRAG(
     db=shared_db,
-    table_name="ColpaliTable",
+    table_name="colpaliDemo",
 )
 
 # Initialize VLM

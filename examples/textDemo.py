@@ -9,8 +9,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Initialize embedding model
-# embedding_model = SentenceTransformer("all-MiniLM-L6-v2", trust_remote_code=True)
-embedding_model = SentenceTransformer("BAAI/bge-base-en", trust_remote_code=True)
+embedding_model = SentenceTransformer("all-MiniLM-L6-v2", trust_remote_code=True)
+# embedding_model = SentenceTransformer("BAAI/bge-base-en", trust_remote_code=True)
 # embedding_model = SentenceTransformer("BAAI/bge-large-en-v1.5", trust_remote_code=True)
 # embedding_model = SentenceTransformer("BAAI/bge-small-en-v1.5", trust_remote_code=True)
 
@@ -21,7 +21,7 @@ shared_db = lancedb.connect("~/shared_rag_db")
 text_rag = SimpleRAG(
     text_embedding_model=embedding_model,
     db=shared_db,
-    table_name="default_table",
+    table_name="textDemo",
 )
 
 # Initialize OpenAI client
