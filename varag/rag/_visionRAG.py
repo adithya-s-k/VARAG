@@ -28,15 +28,6 @@ class VisionRAG:
         print(f"Using device: {self.device}")
 
         # Detect the model based on its name
-        model_name = self.detect_model_name(self.image_embedding_model)
-
-        if model_name not in self.SUPPORTED_MODELS:
-            raise ValueError(
-                f"Unsupported model: {model_name}. Supported models are: {', '.join(self.SUPPORTED_MODELS.keys())}"
-            )
-
-        self.vector_dim = self.SUPPORTED_MODELS[model_name]
-        print(f"Using model: {model_name} with vector dimension: {self.vector_dim}")
 
         if db is None:
             self.db_path = os.path.expanduser(db_path)
@@ -50,7 +41,7 @@ class VisionRAG:
             [
                 pa.field("document_name", pa.string()),
                 pa.field("page_number", pa.int32()),
-                pa.field("vector", pa.list_(pa.float32(), self.vector_dim)),
+                pa.field("vector", pa.list_(pa.float32(), 768)),
                 pa.field("image", pa.binary()),
                 pa.field("metadata", pa.string()),
             ]
@@ -58,26 +49,6 @@ class VisionRAG:
         self.table = self.db.create_table(
             self.table_name, schema=self.schema, exist_ok=True
         )
-
-    def detect_model_name(self, model):
-        # Check if the model has a 'config' attribute
-        if hasattr(model, "config"):
-            if hasattr(model.config, "model_type"):
-                return model.config.model_type
-            elif hasattr(model.config, "name"):
-                return model.config.name
-
-        # If not, check the model's modules
-        for module in model.modules():
-            if hasattr(module, "__class__"):
-                class_name = module.__class__.__name__
-                if "CLIP" in class_name:
-                    return "clip-ViT-B-32"
-                elif "Jina" in class_name:
-                    return "jinaai/jina-clip-v1"
-
-        # If we couldn't detect the model, return the string representation
-        return str(model)
 
     def change_table(self, new_table_name: str):
         self.table_name = new_table_name
