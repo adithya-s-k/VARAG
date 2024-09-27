@@ -171,7 +171,7 @@ def prepare_data(chunks, embeddings):
 def lanceDBConnection(chunks, embeddings):
     db = lancedb.connect("/tmp/lancedb")
     data = prepare_data(chunks, embeddings)
-    table = db.create_table("scratch", data=data, mode="overwrite")
+    table = db.create_table("scratch", data=data, exist_ok=True)
     return table
 
 

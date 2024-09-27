@@ -232,7 +232,7 @@ def create_db(docs_storage, table_name: str = "demo", db_path: str = "lancedb"):
         ]
     )
     data = _gen()
-    table = db.create_table(table_name, schema=schema, data=_gen(), mode="overwrite")
+    table = db.create_table(table_name, schema=schema, data=_gen(), exist_ok=True)
     return table
 
 
