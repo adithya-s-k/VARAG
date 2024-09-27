@@ -383,7 +383,7 @@ def query_pdf(query):
     images = [result["pil_image"] for result in results]
 
     # Run VLM inference on the retrieved images
-    vlm_response = vlm.response(query=query, images=images)
+    vlm_response = vlm.query(query=query, images=images)
 
     return images, vlm_response
 

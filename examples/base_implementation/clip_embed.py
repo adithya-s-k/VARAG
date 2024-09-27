@@ -126,7 +126,7 @@ def generate_response(query: str):
         images = search_images(query)
 
         # Generate response using VLM with multiple images
-        response = vlm.response(query, images)
+        response = vlm.query(query, images)
 
         return response, images
     except Exception as e:

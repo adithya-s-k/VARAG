@@ -39,7 +39,7 @@ def query_and_answer(query, num_results):
 
     # Generate response using OpenAI
     context = "\n".join([r["text"] for r in search_results])
-    response = llm.chat.completions.create(
+    response = llm.query.completions.create(
         model="gpt-4",
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},

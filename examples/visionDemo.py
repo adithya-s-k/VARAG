@@ -55,7 +55,7 @@ def search_and_generate_response(query, db_path, table_name):
             if "metadata" in result:
                 context += f"Metadata: {result['metadata']}\n"
 
-        response = vlm.chat(context, images, max_tokens=500)
+        response = vlm.query(context, images, max_tokens=500)
 
         return response, images
     except Exception as e:
