@@ -70,7 +70,9 @@ with gr.Blocks() as demo:
     gr.Markdown("# TextRAG Document Ingestion and Query System")
 
     with gr.Tab("Ingest Documents"):
-        file_input = gr.File(file_count="multiple", label="Upload PDF Documents")
+        file_input = gr.File(
+            file_count="multiple", label="Upload PDF Documents", file_types=["pdf"]
+        )
         chunk_size = gr.Slider(50, 5000, value=200, step=10, label="Chunk Size")
         use_ocr = gr.Checkbox(label="Use OCR")
         ingest_button = gr.Button("Ingest Documents")

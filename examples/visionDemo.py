@@ -67,7 +67,9 @@ def gradio_interface():
         gr.Markdown("# VisionRAG Image Search and Analysis")
 
         with gr.Tab("Ingest PDFs"):
-            pdf_input = gr.File(label="Upload PDF(s)", file_count="multiple")
+            pdf_input = gr.File(
+                label="Upload PDF(s)", file_count="multiple", file_types=["pdf"]
+            )
             table_name_input = gr.Textbox(
                 label="Table Name (optional)", placeholder="default_table"
             )
