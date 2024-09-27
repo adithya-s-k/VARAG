@@ -12,6 +12,7 @@ import fitz  # PyMuPDF
 import pyarrow as pa
 from multiprocessing import Pool
 from transformers import AutoModel
+from sentence_transformers import SentenceTransformer
 
 load_dotenv()
 
@@ -21,8 +22,8 @@ from varag.vlms import OpenAI  # Replace with your actual VLM import
 # Initialize Jina CLIP model
 MODEL_ID = "jinaai/jina-clip-v1"
 device = "cuda" if torch.cuda.is_available() else "cpu"
-model = AutoModel.from_pretrained(MODEL_ID, trust_remote_code=True).to(device)
-
+# model = AutoModel.from_pretrained(MODEL_ID, trust_remote_code=True).to(device)
+model = SentenceTransformer("jinaai/jina-clip-v1", trust_remote_code=True)
 # Initialize VLM
 vlm = OpenAI()  # Replace with your actual VLM initialization
 
@@ -72,7 +73,7 @@ def pil_to_bytes(img) -> bytes:
 
 
 def embed_images(images: List[Image.Image]):
-    image_features = model.encode_image(images)
+    image_features = model.encode(images)
     return image_features  # This is already a numpy array
 
 
@@ -109,7 +110,7 @@ def ingest_pdf(pdf_file):
 
 
 def embed_text(text: str):
-    text_features = model.encode_text([text])
+    text_features = model.encode([text])
     return text_features.squeeze()  # This is already a numpy array
 
 
@@ -133,7 +134,7 @@ def generate_response(query: str):
         images = search_images(query)
 
         # Generate response using VLM with multiple images
-        response = vlm.response(query, images)
+        response = vlm.chat(query, images)
 
         return response, images
     except Exception as e:
