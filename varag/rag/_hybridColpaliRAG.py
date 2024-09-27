@@ -315,40 +315,22 @@ class HybridColpaliRAG:
         patches = np.reshape(x["page_embedding_flatten"], x["page_embedding_shape"])
         unflattended_embeddinged = torch.from_numpy(patches).to(torch.bfloat16)
 
-        print(unflattended_embeddinged.shape)
-
         return unflattended_embeddinged
-
-    # def base64_to_pil(self, base64_str: str) -> PIL.Image.Image:
-    #     if base64_str.startswith("data:image"):
-    #         base64_str = base64_str.split(",")[1]
-    #     image_data = base64.b64decode(base64_str)
-    #     image = PIL.Image.open(io.BytesIO(image_data))
-    #     return image
 
     def search(
         self,
         query: str,
         k: int = 3,
-        use_text_search: bool = False,
         use_image_search: bool = True,
         limit: int = 100,
     ) -> List[Dict[str, Any]]:
         with torch.no_grad():
-            print(query)
-
             qs = self.get_query_embedding(
                 query, model=self.colpali_model, processor=self.colpali_processor
             )
             query_embedding = self.embed_text(query)
 
-            if use_text_search:
-                limit = limit or 100
-
-                print("Using Text Search for Initial Document Retrival")
-
-                r = self.table.search(query, query_type="fts").limit(limit)
-            elif use_image_search:
+            if use_image_search:
                 limit = limit or 100
 
                 print("using Image Seach for Initial Document Retrival")
@@ -372,8 +354,6 @@ class HybridColpaliRAG:
             .cpu()
             .numpy()
         )
-
-        print(scores)
 
         scores_tensor = torch.from_numpy(scores)
 
