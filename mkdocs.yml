@@ -28,7 +28,7 @@ markdown_extensions:
       alternate_style: true
 
 nav:
-  - Home: ../README.md
+  - Home: index.md
   - Notebooks:
     - Simple RAG: simpleRAG.ipynb
     - Colpali RAG: colpaliRAG.ipynb

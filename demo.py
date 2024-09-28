@@ -16,6 +16,7 @@ from varag.vlms import OpenAI
 from varag.llms import OpenAI as OpenAILLM
 from varag.chunking import FixedTokenChunker
 from varag.utils import get_model_colpali
+import argparse
 
 load_dotenv()
 
@@ -404,6 +405,17 @@ def gradio_interface():
     return demo
 
 
+# Parse command-line arguments
+def parse_args():
+    parser = argparse.ArgumentParser(description="VisionRAG Gradio App")
+    parser.add_argument(
+        "--share", action="store_true", help="Enable Gradio share feature"
+    )
+    return parser.parse_args()
+
+
+# Launch the app
 if __name__ == "__main__":
+    args = parse_args()
     app = gradio_interface()
-    app.launch()
+    app.launch(share=args.share)
