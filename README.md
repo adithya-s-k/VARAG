@@ -168,5 +168,16 @@ For the implementation of **Colpali**, we referred to the following blogs and co
 - [Vision Retrieval by AyushExel](https://github.com/AyushExel/vision-retrieval)
 - [The Rise of Vision-Driven Document Retrieval for RAG](https://blog.vespa.ai/the-rise-of-vision-driven-document-retrieval-for-rag/)
 
-Additionally, we are grateful for the support of the open-source community and the invaluable feedback from users throughout the development journey.
+We would also like to acknowledge the authors of the ColPali paper, which significantly influenced our work:
 
+```
+@misc{faysse2024colpaliefficientdocumentretrieval,
+      title={ColPali: Efficient Document Retrieval with Vision Language Models}, 
+      author={Manuel Faysse and Hugues Sibille and Tony Wu and Bilel Omrani and Gautier Viaud and Céline Hudelot and Pierre Colombo},
+      year={2024},
+      eprint={2407.01449},
+      archivePrefix={arXiv},
+      primaryClass={cs.IR},
+      url={https://arxiv.org/abs/2407.01449}, 
+}
+```
