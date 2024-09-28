@@ -5,6 +5,7 @@ from varag.rag import SimpleRAG
 from varag.chunking import FixedTokenChunker
 import lancedb
 from dotenv import load_dotenv
+import argparse
 
 load_dotenv()
 
@@ -66,37 +67,54 @@ def query_and_answer(query, num_results):
 
 
 # Define the Gradio interface
-with gr.Blocks() as demo:
-    gr.Markdown("# TextRAG Document Ingestion and Query System")
+def create_gradio_interface():
+    with gr.Blocks() as demo:
+        gr.Markdown("# TextRAG Document Ingestion and Query System")
 
-    with gr.Tab("Ingest Documents"):
-        file_input = gr.File(
-            file_count="multiple", label="Upload PDF Documents", file_types=["pdf"]
-        )
-        chunk_size = gr.Slider(50, 5000, value=200, step=10, label="Chunk Size")
-        use_ocr = gr.Checkbox(label="Use OCR")
-        ingest_button = gr.Button("Ingest Documents")
-        ingest_output = gr.Textbox(label="Ingestion Result")
+        with gr.Tab("Ingest Documents"):
+            file_input = gr.File(
+                file_count="multiple", label="Upload PDF Documents", file_types=["pdf"]
+            )
+            chunk_size = gr.Slider(50, 5000, value=200, step=10, label="Chunk Size")
+            use_ocr = gr.Checkbox(label="Use OCR")
+            ingest_button = gr.Button("Ingest Documents")
+            ingest_output = gr.Textbox(label="Ingestion Result")
 
-        ingest_button.click(
-            ingest_documents,
-            inputs=[file_input, chunk_size, use_ocr],
-            outputs=ingest_output,
-        )
+            ingest_button.click(
+                ingest_documents,
+                inputs=[file_input, chunk_size, use_ocr],
+                outputs=ingest_output,
+            )
 
-    with gr.Tab("Query Documents"):
-        query_input = gr.Textbox(label="Enter your query")
-        num_results = gr.Slider(
-            1, 10, value=5, step=1, label="Number of results to retrieve"
-        )
-        query_button = gr.Button("Search and Answer")
-        retrieved_chunks = gr.Textbox(label="Retrieved Chunks")
-        answer_output = gr.Textbox(label="Generated Answer")
+        with gr.Tab("Query Documents"):
+            query_input = gr.Textbox(label="Enter your query")
+            num_results = gr.Slider(
+                1, 10, value=5, step=1, label="Number of results to retrieve"
+            )
+            query_button = gr.Button("Search and Answer")
+            retrieved_chunks = gr.Textbox(label="Retrieved Chunks")
+            answer_output = gr.Textbox(label="Generated Answer")
 
-        query_button.click(
-            query_and_answer,
-            inputs=[query_input, num_results],
-            outputs=[retrieved_chunks, answer_output],
-        )
+            query_button.click(
+                query_and_answer,
+                inputs=[query_input, num_results],
+                outputs=[retrieved_chunks, answer_output],
+            )
 
-demo.launch()
+    return demo
+
+
+# Parse command-line arguments
+def parse_args():
+    parser = argparse.ArgumentParser(description="TextRAG Gradio App")
+    parser.add_argument(
+        "--share", action="store_true", help="Enable Gradio share feature"
+    )
+    return parser.parse_args()
+
+
+# Main execution
+if __name__ == "__main__":
+    args = parse_args()
+    demo = create_gradio_interface()
+    demo.launch(share=args.share)

@@ -5,6 +5,8 @@ from varag.rag import VisionRAG
 from sentence_transformers import SentenceTransformer
 from varag.vlms import OpenAI
 from dotenv import load_dotenv
+import argparse
+
 
 load_dotenv()
 
@@ -17,7 +19,7 @@ embedding_model = SentenceTransformer("jinaai/jina-clip-v1", trust_remote_code=T
 vision_rag = VisionRAG(
     image_embedding_model=embedding_model,
     db=shared_db,
-    table_name="visionDemo4",
+    table_name="visionDemo",
 )
 vlm = OpenAI()
 
@@ -106,7 +108,17 @@ def gradio_interface():
     return demo
 
 
+# Parse command-line arguments
+def parse_args():
+    parser = argparse.ArgumentParser(description="VisionRAG Gradio App")
+    parser.add_argument(
+        "--share", action="store_true", help="Enable Gradio share feature"
+    )
+    return parser.parse_args()
+
+
 # Launch the app
 if __name__ == "__main__":
+    args = parse_args()
     app = gradio_interface()
-    app.launch()
+    app.launch(share=args.share)

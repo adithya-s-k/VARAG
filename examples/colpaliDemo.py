@@ -6,6 +6,7 @@ from typing import List
 from PIL import Image
 import base64
 import io
+import argparse
 
 # Import the colpali class and OpenAI VLM
 from varag.rag import ColpaliRAG
@@ -79,7 +80,7 @@ def search_and_analyze(query, table_name, topk):
         return f"Error generating response: {str(e)}", []
 
 
-def gradio_interface():
+def create_gradio_interface():
     with gr.Blocks() as demo:
         gr.Markdown("# HybridColpaliRAG Image Search and Analysis with VLM")
 
@@ -126,7 +127,17 @@ def gradio_interface():
     return demo
 
 
-# Launch the app
+# Parse command-line arguments
+def parse_args():
+    parser = argparse.ArgumentParser(description="TextRAG Gradio App")
+    parser.add_argument(
+        "--share", action="store_true", help="Enable Gradio share feature"
+    )
+    return parser.parse_args()
+
+
+# Main execution
 if __name__ == "__main__":
-    app = gradio_interface()
-    app.launch()
+    args = parse_args()
+    demo = create_gradio_interface()
+    demo.launch(share=args.share)
