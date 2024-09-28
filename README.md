@@ -181,3 +181,10 @@ We would also like to acknowledge the authors of the ColPali paper, which signif
       url={https://arxiv.org/abs/2407.01449}, 
 }
 ```
+
+<p align="center">
+  <a href="https://adithyask.com">
+    <img src="https://api.star-history.com/svg?repos=adithya-s-k/VARAG&type=Date" alt="Star History Chart">
+  </a>
+</p>
+For any issues, please contact us at adithyaskolavi@gmail.com

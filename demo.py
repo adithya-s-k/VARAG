@@ -21,10 +21,13 @@ import argparse
 load_dotenv()
 
 # Initialize shared database
-shared_db = lancedb.connect("~/rag_db")
+shared_db = lancedb.connect("~/rag_demo_db")
 
 # Initialize embedding models
-text_embedding_model = SentenceTransformer("all-MiniLM-L6-v2", trust_remote_code=True)
+# text_embedding_model = SentenceTransformer("all-MiniLM-L6-v2", trust_remote_code=True)
+text_embedding_model = SentenceTransformer("BAAI/bge-base-en", trust_remote_code=True)
+# text_embedding_model = SentenceTransformer("BAAI/bge-large-en-v1.5", trust_remote_code=True)
+# text_embedding_model = SentenceTransformer("BAAI/bge-small-en-v1.5", trust_remote_code=True)
 image_embedding_model = SentenceTransformer(
     "jinaai/jina-clip-v1", trust_remote_code=True
 )
@@ -157,7 +160,17 @@ def retrieve_data(query, top_k, sequential=False):
 
         print(simple_results)
 
-        simple_context = "\n".join([r["text"] for r in simple_results])
+        simple_context = []
+        for i, r in enumerate(simple_results, 1):
+            context_piece = f"Result {i}:\n"
+            context_piece += f"Source: {r.get('document_name', 'Unknown')}\n"
+            context_piece += f"Chunk Index: {r.get('chunk_index', 'Unknown')}\n"
+
+            context_piece += f"Content:\n{r['text']}\n"
+            context_piece += "-" * 40 + "\n"  # Separator
+            simple_context.append(context_piece)
+
+        simple_context = "\n".join(simple_context)
         end_time = time.time()
         return "SimpleRAG", simple_context, end_time - start_time
 
@@ -270,8 +283,25 @@ def change_table(simple_table, vision_table, colpali_table, hybrid_table):
 
 
 def gradio_interface():
-    with gr.Blocks() as demo:
-        gr.Markdown("# Combined RAG Approaches Demo")
+    with gr.Blocks(
+        theme=gr.themes.Monochrome(radius_size=gr.themes.sizes.radius_none)
+    ) as demo:
+        gr.Markdown(
+            """
+# 👁️👁️ Vision RAG Playground
+
+### Explore and Compare Vision-Augmented Retrieval Techniques
+Built on [VARAG](https://github.com/adithya-s-k/VARAG) - Vision-Augmented Retrieval and Generation
+
+**[⭐ Star the Repository](https://github.com/adithya-s-k/VARAG)** to support the project!
+
+1. **Simple RAG**: Text-based retrieval with OCR support for scanned documents.
+2. **Vision RAG**: Combines text and image retrieval using cross-modal embeddings.
+3. **ColPali RAG**: Embeds entire document pages as images for layout-aware retrieval.
+4. **Hybrid ColPali RAG**: Two-stage retrieval combining image embeddings and ColPali's token-level matching.
+
+            """
+        )
 
         with gr.Tab("Ingest Data"):
             pdf_input = gr.File(
@@ -301,16 +331,26 @@ def gradio_interface():
             )
 
             with gr.Row():
-                simple_content = gr.Markdown(label="SimpleRAG Content")
-                vision_gallery = gr.Gallery(label="VisionRAG Images")
-                colpali_gallery = gr.Gallery(label="ColpaliRAG Images")
-                hybrid_gallery = gr.Gallery(label="HybridColpaliRAG Images")
+                with gr.Column():
+                    with gr.Accordion("SimpleRAG", open=True):
+                        simple_content = gr.Textbox(
+                            label="SimpleRAG Content", lines=10, max_lines=10
+                        )
+                        simple_response = gr.Markdown(label="SimpleRAG Response")
+                with gr.Column():
+                    with gr.Accordion("VisionRAG", open=True):
+                        vision_gallery = gr.Gallery(label="VisionRAG Images")
+                        vision_response = gr.Markdown(label="VisionRAG Response")
 
             with gr.Row():
-                simple_response = gr.Markdown(label="SimpleRAG Response")
-                vision_response = gr.Markdown(label="VisionRAG Response")
-                colpali_response = gr.Markdown(label="ColpaliRAG Response")
-                hybrid_response = gr.Markdown(label="HybridColpaliRAG Response")
+                with gr.Column():
+                    with gr.Accordion("ColpaliRAG", open=True):
+                        colpali_gallery = gr.Gallery(label="ColpaliRAG Images")
+                        colpali_response = gr.Markdown(label="ColpaliRAG Response")
+                with gr.Column():
+                    with gr.Accordion("HybridColpaliRAG", open=True):
+                        hybrid_gallery = gr.Gallery(label="HybridColpaliRAG Images")
+                        hybrid_response = gr.Markdown(label="HybridColpaliRAG Response")
 
         with gr.Tab("Settings"):
             api_key_input = gr.Textbox(label="OpenAI API Key", type="password")
