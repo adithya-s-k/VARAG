@@ -1,5 +1,4 @@
-site_name: My Docs
-site_name: VARAG Documentation
+site_name: VARAG
 repo_url: https://github.com/adithya-s-k/VARAG
 repo_name: adithya-s-k/VARAG
 edit_uri: edit/main/docs/
@@ -30,10 +29,12 @@ markdown_extensions:
 
 nav:
   - Home: index.md
-  - Getting Started: getting-started.md
-  - Features: features.md
-  - API Reference: api-reference.md
-  - Contributing: contributing.md
+  - Notebooks:
+    - Simple RAG: simpleRAG.ipynb
+    - Colpali RAG: colpaliRAG.ipynb
+    - Hybrid Colpali RAG: hybridColpaliRAG.ipynb
+    - Vision RAG: visionRAG.ipynb
+  - Demo: demo.ipynb
 
 extra:
   social:
@@ -41,3 +42,7 @@ extra:
       link: https://github.com/adithya-s-k/VARAG
     - icon: fontawesome/brands/python
       link: https://pypi.org/project/varag/
+
+plugins:
+  - search
+  - mkdocs-jupyter
