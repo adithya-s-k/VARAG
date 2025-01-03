@@ -1,10 +1,12 @@
 import os
 import json
+import uuid
 import logging
-from typing import List, Dict, Any, Union
+from typing import List, Dict, Any, Union, Tuple
 import torch
 import lancedb
 import pyarrow as pa
+import numpy as np
 from pathlib import Path
 import fitz  # PyMuPDF
 from tqdm import tqdm
@@ -12,6 +14,9 @@ from sentence_transformers import SentenceTransformer
 from openai import OpenAI
 from dotenv import load_dotenv
 from varag.chunking import BaseChunker, FixedTokenChunker
+from sklearn.metrics import precision_score, recall_score, f1_score
+import pandas as pd
+
 
 load_dotenv()
 
@@ -46,6 +51,7 @@ class SimpleRAG:
             [
                 pa.field("document_name", pa.string()),
                 pa.field("chunk_index", pa.int32()),
+                pa.field("chunk_id", pa.string()),  # Added chunk_id field
                 pa.field("text", pa.string()),
                 pa.field("vector", pa.list_(pa.float32(), self.vector_dim)),
                 pa.field("metadata", pa.string()),
@@ -111,57 +117,6 @@ class SimpleRAG:
 
         return f"Indexing complete. Total documents in {self.table_name}: {len(self.table)}"
 
-    # def _process_file(
-    #     self,
-    #     file_path: str,
-    #     chunker: "BaseChunker",
-    #     metadata: Dict[str, str],
-    #     verbose: bool,
-    #     ocr: bool,
-    # ):
-    #     if ocr:
-    #         try:
-    #             from docling.datamodel.document import DocumentConversionInput
-    #             from docling.document_converter import DocumentConverter
-
-    #             doc_converter = DocumentConverter()
-    #             input_data = DocumentConversionInput.from_paths([Path(file_path)])
-    #             conv_results = doc_converter.convert(input_data)
-
-    #             if (
-    #                 conv_results[0].status == "SUCCESS"
-    #                 or conv_results[0].status == "PARTIAL_SUCCESS"
-    #             ):
-    #                 text = conv_results[0].render_as_markdown()
-    #             else:
-    #                 logger.info(f"Document {file_path} failed to convert.")
-    #                 return
-    #         except ImportError:
-    #             logger.error(
-    #                 "OCR functionality requires additional dependencies. "
-    #                 "Please install them with: pip install varag[ocr]"
-    #             )
-    #             raise ImportError(
-    #                 "OCR dependencies not installed. " "Run: pip install varag[ocr]"
-    #             )
-    #     else:
-    #         text = self.extract_text_with_pymupdf(file_path)
-
-    #     chunks = chunker.split_text(text)
-    #     embeddings = self.text_embedding_model.encode(chunks, show_progress_bar=verbose)
-
-    #     data = [
-    #         {
-    #             "document_name": os.path.basename(file_path),
-    #             "chunk_index": i,
-    #             "text": chunk,
-    #             "vector": embedding.tolist(),
-    #             "metadata": json.dumps(metadata or {}),
-    #         }
-    #         for i, (chunk, embedding) in enumerate(zip(chunks, embeddings))
-    #     ]
-
-    #     self.table.add(data)
     def _process_file(
         self,
         file_path: str,
@@ -181,7 +136,6 @@ class SimpleRAG:
                 logger.info(f"Starting OCR conversion for file: {file_path}")
                 conv_results = doc_converter.convert(input_data)
 
-                # Convert generator to list and process the first item
                 conv_result = next(conv_results, None)
                 if conv_result is None:
                     raise ValueError("No conversion results")
@@ -220,6 +174,7 @@ class SimpleRAG:
             {
                 "document_name": os.path.basename(file_path),
                 "chunk_index": i,
+                "chunk_id": str(uuid.uuid4()),  # Generate unique ID for each chunk
                 "text": chunk,
                 "vector": embedding.tolist(),
                 "metadata": json.dumps(metadata or {}),
@@ -245,6 +200,7 @@ class SimpleRAG:
         for result in results:
             result["metadata"] = json.loads(result["metadata"])
         return results
+    
 
     def add_to_index(
         self,
