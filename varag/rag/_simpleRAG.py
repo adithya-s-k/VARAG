@@ -264,6 +264,95 @@ class SimpleRAG:
                 continue
                 
         return eval_dataset
+    
+
+    def calculate_ndcg(self, relevant_ids: List[str], retrieved_ids: List[str]) -> float:
+        """Calculate NDCG score for retrieved results."""
+        relevance = [1 if id in relevant_ids else 0 for id in retrieved_ids]
+        idcg = sum((2**1 - 1) / np.log2(i + 2) for i in range(len(relevant_ids)))
+        dcg = sum((2**rel - 1) / np.log2(i + 2) for i, rel in enumerate(relevance))
+        return dcg / idcg if idcg > 0 else 0
+
+    def evaluate_retrieval(
+        self, 
+        eval_dataset: List[Dict[str, Any]], 
+        k: int = 5
+    ) -> Dict[str, Any]:
+        """
+        Evaluate retrieval performance using the generated evaluation dataset.
+        
+        Args:
+            eval_dataset: List of evaluation samples
+            k: Number of documents to retrieve
+            
+        Returns:
+            Dictionary containing evaluation metrics
+        """
+        metrics = {
+            "precision": [],
+            "recall": [],
+            "f1": [],
+            "ndcg": [],
+            "retrieved_correct": 0,
+            "total_queries": len(eval_dataset)
+        }
+        
+        detailed_results = []
+        
+        for sample in tqdm(eval_dataset, desc="Evaluating retrieval"):
+            # Perform retrieval
+            results = self.search(sample["question"], k=k)
+            retrieved_ids = [result["chunk_id"] for result in results]
+            relevant_id = sample["chunk_id"]
+            
+            # Calculate metrics
+            retrieved_correct = int(relevant_id in retrieved_ids)
+            metrics["retrieved_correct"] += retrieved_correct
+            
+            # Calculate precision, recall, and F1 for this query
+            precision = retrieved_correct / len(retrieved_ids)
+            recall = retrieved_correct
+            f1 = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
+            
+            metrics["precision"].append(precision)
+            metrics["recall"].append(recall)
+            metrics["f1"].append(f1)
+            
+            # Calculate NDCG
+            ndcg = self.calculate_ndcg([relevant_id], retrieved_ids)
+            metrics["ndcg"].append(ndcg)
+            
+            # Store detailed results
+            detailed_results.append({
+                "question": sample["question"],
+                "ground_truth": sample["ground_truth"],
+                "retrieved_correct": retrieved_correct,
+                "retrieved_chunks": [result["text"] for result in results],
+                "precision": precision,
+                "recall": recall,
+                "f1": f1,
+                "ndcg": ndcg
+            })
+        
+        # Calculate aggregate metrics
+        final_metrics = {
+            "mean_precision": np.mean(metrics["precision"]),
+            "mean_recall": np.mean(metrics["recall"]),
+            "mean_f1": np.mean(metrics["f1"]),
+            "mean_ndcg": np.mean(metrics["ndcg"]),
+            "success_rate": metrics["retrieved_correct"] / metrics["total_queries"]
+        }
+        
+        return {
+            "aggregate_metrics": final_metrics,
+            "detailed_results": detailed_results
+        }
+
+    def evaluate_generation(self):
+        """
+        Placeholder for future implementation of generation evaluation.
+        """
+        pass
 
 
     def add_to_index(
