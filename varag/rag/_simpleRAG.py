@@ -200,7 +200,71 @@ class SimpleRAG:
         for result in results:
             result["metadata"] = json.loads(result["metadata"])
         return results
-    
+    def generate_eval_dataset(
+        self, 
+        num_samples: int = 100, 
+        openai_model: str = "gpt-4",
+        temperature: float = 0.7
+    ) -> List[Dict[str, Any]]:
+        """
+        Generate an evaluation dataset by sampling chunks and creating QA pairs.
+        
+        Args:
+            num_samples: Number of samples to generate
+            openai_model: OpenAI model to use for generation
+            temperature: Temperature for generation
+            
+        Returns:
+            List of dictionaries containing evaluation data
+        """
+        client = OpenAI()
+        
+        # Sample random chunks from the database
+        total_chunks = len(self.table)
+        if total_chunks < num_samples:
+            logger.warning(f"Requested {num_samples} samples but only {total_chunks} chunks available")
+            num_samples = total_chunks
+            
+        sampled_chunks = self.table.take(np.random.choice(total_chunks, num_samples, replace=False))
+        
+        eval_dataset = []
+        
+        for chunk in tqdm(sampled_chunks, desc="Generating evaluation samples"):
+            # Create prompt for GPT to generate question and answer
+            prompt = f"""Given the following text, generate a relevant question and its corresponding answer.
+            The question should be specific enough that this text chunk contains the complete answer.
+            
+            Text: {chunk['text']}
+            
+            Output the response in the following JSON format:
+            {{
+                "question": "the generated question",
+                "ground_truth": "the answer that can be found in the text"
+            }}
+            """
+            
+            try:
+                response = client.chat.completions.create(
+                    model=openai_model,
+                    messages=[{"role": "user", "content": prompt}],
+                    temperature=temperature
+                )
+                
+                qa_pair = json.loads(response.choices[0].message.content)
+                
+                eval_dataset.append({
+                    "chunk_id": chunk["chunk_id"],
+                    "chunk_content": chunk["text"],
+                    "question": qa_pair["question"],
+                    "ground_truth": qa_pair["ground_truth"]
+                })
+                
+            except Exception as e:
+                logger.error(f"Error generating QA pair: {str(e)}")
+                continue
+                
+        return eval_dataset
+
 
     def add_to_index(
         self,
