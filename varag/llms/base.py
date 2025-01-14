@@ -5,6 +5,9 @@ import io
 
 
 class BaseLLM(ABC):
+    """Abstract base class for LLM wrappers"""
+    
     @abstractmethod
-    def __call__(self, system_prompt: str, context: str, query: str) -> str:
+    def query(self, query: str, **kwargs) -> str:
+        """Abstract method for querying the model"""
         pass
