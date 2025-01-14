@@ -8,6 +8,7 @@ from abc import ABC, abstractmethod
 from varag.llms import BaseLLM
 from io import BytesIO
 
+
 class LiteLLM:
     """
     A flexible wrapper for LLM models using LiteLLM as the backend.
@@ -19,6 +20,8 @@ class LiteLLM:
         model: str,
         api_key: Optional[str] = None,
         api_base: Optional[str] = None,
+        is_vision_required: bool = False,
+        verbose: Optional[bool] = False,
         **kwargs
     ):
         """
@@ -28,18 +31,33 @@ class LiteLLM:
             model: The model identifier (e.g., "gpt-4", "claude-3-opus-20240229")
             api_key: Optional API key (will use environment variables if not provided)
             api_base: Optional API base URL
+            is_vision_required: If True, will raise an error if the model doesn't support vision
             **kwargs: Additional arguments to pass to litellm
+            
+        Raises:
+            ValueError: If is_vision_required is True but the model doesn't support vision
         """
         self.model = model
         self.api_key = api_key
         self.api_base = api_base
+        self.verbose = verbose
         self.kwargs = kwargs
-        
-        # Validate environment and model access
-        self._validate_setup()
         
         # Cache vision capability
         self._is_vision_model = litellm.supports_vision(model=self.model)
+        
+        # set verbosity of litellm by default - false
+        litellm.set_verbose=self.verbose
+        
+        # Check vision requirement before proceeding
+        if is_vision_required and not self._is_vision_model:
+            raise ValueError(
+                f"Model '{model}' does not support vision inputs, but vision capability was required. "
+                "Please choose a vision-capable model."
+            )
+        
+        # Validate environment and model access
+        self._validate_setup()
 
     def _validate_setup(self) -> None:
         """Validate the environment setup and model access."""
