@@ -163,7 +163,7 @@ class SimpleRAG:
             text = self.extract_text_with_pymupdf(file_path)
 
         logger.info(f"Chunking text for file: {file_path}")
-        chunks = chunker.split_text(text)
+        chunks = chunker.chunk(text)
         logger.info(f"Generated {len(chunks)} chunks for file: {file_path}")
 
         logger.info(f"Generating embeddings for file: {file_path}")
