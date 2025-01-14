@@ -125,25 +125,47 @@ class SimpleRAG:
         verbose: bool,
         ocr: bool,
     ):
+        """
+        Process a single file for text extraction and embedding.
+        
+        Args:
+            file_path: Path to the file to process
+            chunker: Chunking strategy to use
+            metadata: Additional metadata to store with chunks
+            verbose: Whether to show progress bars
+            ocr: Whether to use OCR for text extraction
+        """
         if ocr:
             logger.info(f"Using OCR for file: {file_path}")
             try:
-                from docling.datamodel.document import DocumentConversionInput
-                from docling.document_converter import DocumentConverter
+                from docling.datamodel.pipeline_options import PdfPipelineOptions
+                from docling.document_converter import DocumentConverter, PdfFormatOption
+                from docling.datamodel.base_models import InputFormat
 
-                doc_converter = DocumentConverter()
-                input_data = DocumentConversionInput.from_paths([Path(file_path)])
-                logger.info(f"Starting OCR conversion for file: {file_path}")
-                conv_results = doc_converter.convert(input_data)
-
-                conv_result = next(conv_results, None)
-                if conv_result is None:
-                    raise ValueError("No conversion results")
-
-                text = conv_result.render_as_markdown()
-                logger.info(
-                    f"OCR conversion completed for file: {file_path}. Status: {conv_result.status}"
+                # Configure pipeline options
+                pipeline_options = PdfPipelineOptions()
+                pipeline_options.do_ocr = True
+                pipeline_options.do_table_structure = True
+                pipeline_options.table_structure_options.do_cell_matching = True
+                
+                # Initialize document converter with configured options
+                doc_converter = DocumentConverter(
+                    format_options={
+                        InputFormat.PDF: PdfFormatOption(
+                            pipeline_options=pipeline_options
+                        )
+                    }
                 )
+
+                logger.info(f"Starting OCR conversion for file: {file_path}")
+                conv_result = doc_converter.convert(Path(file_path))
+                
+                if not conv_result:
+                    raise ValueError("No conversion results")
+                
+                # Export as markdown for consistent formatting
+                text = conv_result.document.export_to_markdown()
+                logger.info(f"OCR conversion completed for file: {file_path}")
 
             except ImportError:
                 logger.error(
@@ -174,7 +196,7 @@ class SimpleRAG:
             {
                 "document_name": os.path.basename(file_path),
                 "chunk_index": i,
-                "chunk_id": str(uuid.uuid4()),  # Generate unique ID for each chunk
+                "chunk_id": str(uuid.uuid4()),
                 "text": chunk,
                 "vector": embedding.tolist(),
                 "metadata": json.dumps(metadata or {}),
